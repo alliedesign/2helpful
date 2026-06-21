@@ -172,15 +172,15 @@ function ListingForm({ helper, email }) {
         <label style={labelStyle}>Categories (comma separated)
           <input style={fieldStyle} value={form.categories} onChange={(e) => set("categories", e.target.value)} placeholder="tech help, setup, troubleshooting" />
         </label>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <label style={{ ...labelStyle, flex: 1 }}>Mode
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <label style={{ ...labelStyle, flex: 1, minWidth: 200 }}>Mode
             <select style={fieldStyle} value={form.mode} onChange={(e) => set("mode", e.target.value)}>
               <option value="both">🌐 Virtual + 📍 In person</option>
               <option value="virtual">🌐 Virtual only</option>
               <option value="in_person">📍 In person only</option>
             </select>
           </label>
-          <label style={{ ...labelStyle, flex: 1 }}>Service area
+          <label style={{ ...labelStyle, flex: 1, minWidth: 200 }}>Service area
             <input type="number" style={fieldStyle} value={form.serviceAreaMiles} onChange={(e) => set("serviceAreaMiles", e.target.value)} />
             <span style={{ display: "block", color: "var(--muted)", fontSize: ".8rem", marginTop: ".3rem" }}>
               miles from {form.headquarters || "your headquarters"}

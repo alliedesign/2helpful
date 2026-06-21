@@ -216,9 +216,9 @@ function SearchInner() {
       )}
 
       {!loading && results.length > 0 && (
-        <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
+        <div className="search-cols">
           {/* LEFT: scrollable list of businesses */}
-          <div style={{ flex: "0 0 42%", maxWidth: 460 }}>
+          <div className="search-list">
             {results.map((r) => {
               const isSel = selected && selected.id === r.id;
               return (
@@ -270,7 +270,7 @@ function SearchInner() {
 
           {/* RIGHT: detail panel for the selected business */}
           {selected && (
-            <div style={{ flex: 1, position: "sticky", top: "1rem", border: "1px solid var(--line)", borderRadius: 18, overflow: "hidden", background: "#fff" }}>
+            <div className="search-detail" style={{ border: "1px solid var(--line)", borderRadius: 18, overflow: "hidden", background: "#fff" }}>
               <ChannelBanner listing={selected} height={150} avatarSize={76} />
               <div style={{ padding: "0 1.4rem 1.4rem" }}>
                 <h2 style={{ fontWeight: 800, fontSize: "1.5rem", letterSpacing: "-.02em" }}>{selected.business_name}</h2>
