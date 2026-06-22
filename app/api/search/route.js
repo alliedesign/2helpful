@@ -17,6 +17,7 @@ export async function GET(request) {
     const lat = searchParams.get("lat") ? Number(searchParams.get("lat")) : null;
     const lng = searchParams.get("lng") ? Number(searchParams.get("lng")) : null;
     const mode = searchParams.get("mode") || null;
+    const category = searchParams.get("category") || null;
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const perPage = 100;
 
@@ -26,6 +27,7 @@ export async function GET(request) {
       user_lat: lat,
       user_lng: lng,
       want_mode: mode,
+      want_category: category,
       max_rows: perPage,
       skip_rows: (page - 1) * perPage,
     });
@@ -37,7 +39,7 @@ export async function GET(request) {
 
     // Total count for pagination (best-effort).
     let total = (data ?? []).length;
-    const { data: cnt } = await supabase.rpc("count_listings", { q, user_lat: lat, user_lng: lng, want_mode: mode });
+    const { data: cnt } = await supabase.rpc("count_listings", { q, user_lat: lat, user_lng: lng, want_mode: mode, want_category: category });
     if (typeof cnt === "number") total = cnt;
 
     return Response.json({ results: data ?? [], total, page, perPage });

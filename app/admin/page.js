@@ -1,6 +1,7 @@
 // app/admin/page.js
 "use client";
 import { useState } from "react";
+import { CATEGORIES } from "@/lib/categories";
 
 export default function Admin() {
   const [secret, setSecret] = useState("");
@@ -44,7 +45,7 @@ export default function Admin() {
   const blankForm = {
     businessName: "", websiteUrl: "", description: "", headquarters: "",
     ownerName: "", ownerEmail: "", avatarUrl: "", headerUrl: "",
-    categories: "", mode: "both", serviceAreaMiles: 25, nationwide: false,
+    categories: [], mode: "both", serviceAreaMiles: 25, nationwide: false,
     phone: "", hours: "", address: "",
     instagram: "", facebook: "", tiktok: "", twitter: "", youtube: "", linkedin: "",
     durationDays: 30, permanent: true, featured: false, featuredDays: 30,
@@ -62,9 +63,7 @@ export default function Admin() {
     try {
       const payload = {
         ...addForm,
-        categories: addForm.categories
-          ? addForm.categories.split(",").map((c) => c.trim()).filter(Boolean)
-          : [],
+        categories: addForm.categories,
       };
       const res = await fetch("/api/admin/add-listing", {
         method: "POST",
@@ -157,7 +156,29 @@ export default function Admin() {
             <input style={{ ...inp, flex: 1, minWidth: 200 }} placeholder="Contact email (optional)" value={addForm.ownerEmail} onChange={(e) => setF("ownerEmail", e.target.value)} />
           </div>
 
-          <input style={inp} placeholder="Categories, comma-separated (e.g. tech help, setup, wifi)" value={addForm.categories} onChange={(e) => setF("categories", e.target.value)} />
+          <div>
+            <div style={{ fontSize: ".82rem", color: "var(--muted)", marginBottom: ".4rem" }}>Categories (pick all that apply):</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px,1fr))", gap: ".35rem" }}>
+              {CATEGORIES.filter((c) => c.value !== "general").map((c) => {
+                const on = addForm.categories.includes(c.value);
+                return (
+                  <label key={c.value} style={{
+                    display: "flex", alignItems: "center", gap: ".4rem", padding: ".4rem .55rem",
+                    border: "1px solid " + (on ? "var(--teal)" : "var(--silver)"), borderRadius: 8,
+                    background: on ? "var(--teal-wash)" : "#fff", cursor: "pointer", fontSize: ".85rem",
+                  }}>
+                    <input type="checkbox" checked={on} onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...addForm.categories, c.value]
+                        : addForm.categories.filter((v) => v !== c.value);
+                      setF("categories", next);
+                    }} />
+                    <span>{c.icon} {c.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
 
           <div style={{ display: "flex", gap: ".7rem", flexWrap: "wrap" }}>
             <input style={{ ...inp, flex: 1, minWidth: 200 }} placeholder="Profile picture URL" value={addForm.avatarUrl} onChange={(e) => setF("avatarUrl", e.target.value)} />

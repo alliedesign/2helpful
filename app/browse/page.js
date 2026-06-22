@@ -29,7 +29,7 @@ export default function BrowsePage() {
 
 function Tile({ cat }) {
   const [ok, setOk] = useState(true);
-  const href = `/search?q=${encodeURIComponent(cat.label)}`;
+  const href = `/search?category=${encodeURIComponent(cat.value)}`;
   return (
     <a href={href} style={{
       position: "relative", display: "block", height: 170, borderRadius: 14, overflow: "hidden",

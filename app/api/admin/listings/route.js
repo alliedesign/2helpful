@@ -63,17 +63,14 @@ export async function PATCH(request) {
       update.active_until = null;
     } else if (action === "feature") {
       const days = Number(fields.days) || 30;
+      const until = fields.permanent ? FOREVER : new Date(now.getTime() + days * 86400000).toISOString();
       update.featured_from = now.toISOString();
-      update.featured_until = fields.permanent
-        ? FOREVER
-        : new Date(now.getTime() + days * 86400000).toISOString();
-      // Featuring implies it should also be live.
-      if (!fields.keepLive) {
-        update.active_from = now.toISOString();
-        update.active_until = fields.permanent ? FOREVER : new Date(now.getTime() + days * 86400000).toISOString();
-        update.is_approved = true;
-        update.review_status = "approved";
-      }
+      update.featured_until = until;
+      // Featuring ALWAYS makes it live too, so it appears in search automatically.
+      update.active_from = now.toISOString();
+      update.active_until = until;
+      update.is_approved = true;
+      update.review_status = "approved";
     } else if (action === "unfeature") {
       update.featured_from = null;
       update.featured_until = null;

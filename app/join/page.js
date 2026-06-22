@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { browserClient } from "@/lib/supabase";
 import { uploadImage } from "@/lib/uploadImage";
 import AuthForm from "@/app/components/AuthForm";
+import { CATEGORIES } from "@/lib/categories";
 
 const supabase = browserClient();
 
@@ -53,7 +54,7 @@ function ListingForm({ helper, email }) {
     avatarUrl: "", headerUrl: "", nationwide: false, paidDays: 1,
     phone: "", hours: "", address: "",
     instagram: "", facebook: "", tiktok: "", twitter: "", youtube: "", linkedin: "",
-    categories: "", mode: "both", serviceAreaMiles: 25, attestedIndependent: false,
+    categories: [], mode: "both", serviceAreaMiles: 25, attestedIndependent: false,
   });
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -99,7 +100,7 @@ function ListingForm({ helper, email }) {
           phone: form.phone, hours: form.hours, address: form.address,
           instagram: form.instagram, facebook: form.facebook, tiktok: form.tiktok,
           twitter: form.twitter, youtube: form.youtube, linkedin: form.linkedin,
-          categories: form.categories.split(",").map((c) => c.trim()).filter(Boolean),
+          categories: form.categories,
           mode: form.mode,
           serviceAreaMiles: Number(form.serviceAreaMiles),
           attestedIndependent: form.attestedIndependent,
@@ -169,9 +170,31 @@ function ListingForm({ helper, email }) {
         <label style={labelStyle}>What you offer (this is what people search)
           <textarea style={{ ...fieldStyle, minHeight: 110 }} required value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Friendly on-site and remote tech help: printers, wifi, new devices, and confusing apps." />
         </label>
-        <label style={labelStyle}>Categories (comma separated)
-          <input style={fieldStyle} value={form.categories} onChange={(e) => set("categories", e.target.value)} placeholder="tech help, setup, troubleshooting" />
-        </label>
+        <div style={labelStyle}>Categories (pick all that apply — this is how people find you)
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: ".4rem", marginTop: ".5rem" }}>
+            {CATEGORIES.filter((c) => c.value !== "general").map((c) => {
+              const on = form.categories.includes(c.value);
+              return (
+                <label key={c.value} style={{
+                  display: "flex", alignItems: "center", gap: ".5rem", padding: ".5rem .7rem",
+                  border: "1px solid " + (on ? "var(--teal)" : "var(--silver)"), borderRadius: 9,
+                  background: on ? "var(--teal-wash)" : "#fff", cursor: "pointer", fontSize: ".9rem",
+                }}>
+                  <input
+                    type="checkbox" checked={on}
+                    onChange={(e) => {
+                      const next = e.target.checked
+                        ? [...form.categories, c.value]
+                        : form.categories.filter((v) => v !== c.value);
+                      set("categories", next);
+                    }}
+                  />
+                  <span>{c.icon} {c.label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
           <label style={{ ...labelStyle, flex: 1, minWidth: 200 }}>Mode
             <select style={fieldStyle} value={form.mode} onChange={(e) => set("mode", e.target.value)}>

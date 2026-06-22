@@ -77,8 +77,9 @@ function SearchInner() {
     runSearch(q, mode, null);
   }
 
-  async function runSearch(query, m, c, pg = 1) {
+  async function runSearch(query, m, c, pg = 1, category = null) {
     const loc = c || coords;
+    const cat = category !== null ? category : (params.get("category") || "");
     setLoading(true);
     setSearched(true);
     setErr("");
@@ -86,6 +87,7 @@ function SearchInner() {
       const url = new URL("/api/search", window.location.origin);
       if (query) url.searchParams.set("q", query);
       if (m) url.searchParams.set("mode", m);
+      if (cat) url.searchParams.set("category", cat);
       if (loc) { url.searchParams.set("lat", loc.lat); url.searchParams.set("lng", loc.lng); }
       url.searchParams.set("page", pg);
       const res = await fetch(url);
@@ -111,7 +113,8 @@ function SearchInner() {
 
   useEffect(() => {
     const initial = params.get("q") || "";
-    if (initial) runSearch(initial, "");
+    const cat = params.get("category") || "";
+    if (initial || cat) runSearch(initial, "", null, 1, cat);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
