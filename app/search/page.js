@@ -114,7 +114,9 @@ function SearchInner() {
   useEffect(() => {
     const initial = params.get("q") || "";
     const cat = params.get("category") || "";
-    if (initial || cat) runSearch(initial, "", null, 1, cat);
+    // Always run a search on load — with no query this shows all
+    // live/featured listings, so the page is never blank on arrival.
+    runSearch(initial, "", null, 1, cat);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -215,6 +217,16 @@ function SearchInner() {
         <p style={{ color: "var(--muted)" }}>
           No independent helpers matched that yet. Try different words — or{" "}
           <a href="/join" style={{ color: "var(--teal-deep)", fontWeight: 600 }}>list your own business</a>.
+        </p>
+      )}
+
+      {!loading && results.length > 0 && (
+        <p style={{ fontWeight: 700, fontSize: "1.05rem", margin: "0 0 .9rem" }}>
+          {params.get("category")
+            ? `${total} ${total === 1 ? "helper" : "helpers"} in this category`
+            : params.get("q")
+            ? `${total} ${total === 1 ? "result" : "results"} for “${params.get("q")}”`
+            : `${total} ${total === 1 ? "helper" : "helpers"} available`}
         </p>
       )}
 
