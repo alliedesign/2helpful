@@ -2,6 +2,7 @@
 "use client";
 import { useState } from "react";
 import { CATEGORIES } from "@/lib/categories";
+import ImageDrop from "@/app/components/ImageDrop";
 
 export default function Admin() {
   const [secret, setSecret] = useState("");
@@ -181,8 +182,12 @@ export default function Admin() {
           </div>
 
           <div style={{ display: "flex", gap: ".7rem", flexWrap: "wrap" }}>
-            <input style={{ ...inp, flex: 1, minWidth: 200 }} placeholder="Profile picture URL" value={addForm.avatarUrl} onChange={(e) => setF("avatarUrl", e.target.value)} />
-            <input style={{ ...inp, flex: 1, minWidth: 200 }} placeholder="Banner image URL" value={addForm.headerUrl} onChange={(e) => setF("headerUrl", e.target.value)} />
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <ImageDrop label="Profile picture" bucket="avatars" round value={addForm.avatarUrl} onChange={(url) => setF("avatarUrl", url)} />
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <ImageDrop label="Banner image" bucket="headers" value={addForm.headerUrl} onChange={(url) => setF("headerUrl", url)} />
+            </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: ".7rem" }}>
@@ -280,6 +285,18 @@ export default function Admin() {
                     Nationwide
                   </label>
                   <button style={{ ...btnSm, ...btnGhost, color: "#b13b3b", borderColor: "#e3b9b9" }} onClick={() => deleteListing(l.id, l.business_name)}>Delete</button>
+                </div>
+
+                {/* Inline image editing — uploads save immediately */}
+                <div style={{ display: "flex", gap: ".7rem", flexWrap: "wrap", marginTop: ".7rem" }}>
+                  <div style={{ flex: 1, minWidth: 180 }}>
+                    <ImageDrop label="Profile picture" bucket="avatars" round value={l.avatar_url}
+                      onChange={(url) => listingAction(l.id, { avatarUrl: url })} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 180 }}>
+                    <ImageDrop label="Banner image" bucket="headers" value={l.header_url}
+                      onChange={(url) => listingAction(l.id, { headerUrl: url })} />
+                  </div>
                 </div>
               </div>
             ))}
