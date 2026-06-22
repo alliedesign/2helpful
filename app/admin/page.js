@@ -8,6 +8,38 @@ export default function Admin() {
   const [requests, setRequests] = useState(null);
   const [msg, setMsg] = useState("");
 
+  // All listings for the management panel
+  const [allListings, setAllListings] = useState(null);
+  const [mgrMsg, setMgrMsg] = useState("");
+
+  async function loadListings() {
+    const res = await fetch("/api/admin/listings", { headers: { "x-admin-secret": secret } });
+    if (res.ok) { const j = await res.json(); setAllListings(j.listings || []); }
+  }
+
+  async function listingAction(listingId, payload) {
+    setMgrMsg("");
+    const res = await fetch("/api/admin/listings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+      body: JSON.stringify({ listingId, ...payload }),
+    });
+    if (!res.ok) { const j = await res.json(); setMgrMsg(j.error || "Action failed."); return; }
+    await loadListings();
+  }
+
+  async function deleteListing(listingId, name) {
+    if (!confirm(`Delete "${name}"? This removes it from the site permanently.`)) return;
+    setMgrMsg("");
+    const res = await fetch("/api/admin/listings", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", "x-admin-secret": secret },
+      body: JSON.stringify({ listingId }),
+    });
+    if (!res.ok) { const j = await res.json(); setMgrMsg(j.error || "Delete failed."); return; }
+    await loadListings();
+  }
+
   // Admin "add a listing" form state
   const blankForm = {
     businessName: "", websiteUrl: "", description: "", headquarters: "",
@@ -43,6 +75,7 @@ export default function Admin() {
       if (!res.ok) { setAddMsg(json.error || "Could not add listing."); setAdding(false); return; }
       setAddMsg("✅ " + (json.message || "Listing added and live."));
       setAddForm(blankForm);
+      loadListings();
     } catch {
       setAddMsg("Something went wrong.");
     }
@@ -58,6 +91,8 @@ export default function Admin() {
     // Also load website build requests.
     const r2 = await fetch("/api/admin/website-requests", { headers: { "x-admin-secret": secret } });
     if (r2.ok) { const j2 = await r2.json(); setRequests(j2.requests || []); }
+    // Also load all listings for the management panel.
+    await loadListings();
   }
 
   async function decide(listingId, decision) {
@@ -76,6 +111,8 @@ export default function Admin() {
   }
 
   const inp = { border: "1px solid var(--silver)", borderRadius: 9, padding: ".6rem .8rem", width: "100%", background: "#fff", fontSize: ".95rem" };
+  const btnSm = { padding: ".4rem .85rem", borderRadius: 8, fontSize: ".85rem", fontWeight: 700, cursor: "pointer", border: "none" };
+  const btnGhost = { background: "#fff", border: "1px solid var(--silver)", color: "var(--ink)" };
 
   return (
     <main className="wrap" style={{ paddingTop: "4vh", paddingBottom: "4rem", maxWidth: 820 }}>
@@ -176,7 +213,58 @@ export default function Admin() {
         </div>
       </section>
 
-      {queue && queue.length === 0 && <p style={{ color: "var(--muted)" }}>🎉 Queue is empty — nothing to review.</p>}
+      {/* ───────────── Admin: Manage existing listings ───────────── */}
+      {allListings && (
+        <section style={{ margin: "0 0 2.5rem" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: ".5rem" }}>
+            <h2 style={{ fontWeight: 800, fontSize: "1.3rem" }}>Manage listings ({allListings.length})</h2>
+            <button onClick={loadListings} style={{ background: "none", border: "none", color: "var(--teal-deep)", fontWeight: 600, cursor: "pointer" }}>↻ Refresh</button>
+          </div>
+          {mgrMsg && <p style={{ color: "#b13b3b", fontSize: ".9rem" }}>{mgrMsg}</p>}
+          {allListings.length === 0 && <p style={{ color: "var(--muted)" }}>No listings yet.</p>}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: ".7rem", marginTop: ".8rem" }}>
+            {allListings.map((l) => (
+              <div key={l.id} style={{ border: "1px solid var(--line)", borderRadius: 12, padding: "1rem 1.1rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: ".4rem" }}>
+                  <strong style={{ fontSize: "1.05rem" }}>{l.business_name}</strong>
+                  <div style={{ display: "flex", gap: ".4rem", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: ".75rem", fontWeight: 700, padding: ".2rem .6rem", borderRadius: 999,
+                      background: l.is_live ? "var(--teal-wash)" : "#f3e8d0", color: l.is_live ? "var(--teal-deep)" : "#9a5a16" }}>
+                      {l.is_live ? "● Live" : "○ Not live"}
+                    </span>
+                    {l.is_featured && (
+                      <span style={{ fontSize: ".75rem", fontWeight: 700, padding: ".2rem .6rem", borderRadius: 999, background: "#fdf3c4", color: "#8a6d00" }}>★ Featured</span>
+                    )}
+                  </div>
+                </div>
+                <div style={{ color: "var(--muted)", fontSize: ".85rem", margin: ".3rem 0 .2rem" }}>
+                  {l.headquarters || "—"} · {l.helper_email || "no email"}
+                  {l.active_until ? ` · live until ${new Date(l.active_until).toLocaleDateString()}` : ""}
+                </div>
+
+                <div style={{ display: "flex", gap: ".5rem", marginTop: ".7rem", flexWrap: "wrap" }}>
+                  {!l.is_live ? (
+                    <button className="btn" style={btnSm} onClick={() => listingAction(l.id, { action: "makeLive", permanent: true })}>Make live (permanent)</button>
+                  ) : (
+                    <button style={{ ...btnSm, ...btnGhost }} onClick={() => listingAction(l.id, { action: "endLive" })}>Take down</button>
+                  )}
+                  {!l.is_featured ? (
+                    <button className="btn" style={{ ...btnSm, background: "#caa42a", color: "#3a2e00" }} onClick={() => listingAction(l.id, { action: "feature", permanent: true })}>★ Feature</button>
+                  ) : (
+                    <button style={{ ...btnSm, ...btnGhost }} onClick={() => listingAction(l.id, { action: "unfeature" })}>Unfeature</button>
+                  )}
+                  <label style={{ ...btnSm, ...btnGhost, display: "flex", alignItems: "center", gap: ".35rem", cursor: "pointer" }}>
+                    <input type="checkbox" checked={l.nationwide} onChange={(e) => listingAction(l.id, { nationwide: e.target.checked })} />
+                    Nationwide
+                  </label>
+                  <button style={{ ...btnSm, ...btnGhost, color: "#b13b3b", borderColor: "#e3b9b9" }} onClick={() => deleteListing(l.id, l.business_name)}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {queue && queue.map((l) => (
         <div key={l.id} style={{ border: "1px solid var(--line)", borderRadius: 12, padding: "1.2rem", marginBottom: "1rem" }}>
