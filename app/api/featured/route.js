@@ -16,7 +16,7 @@ export async function GET() {
       .eq("is_approved", true)
       .gt("featured_until", nowIso)        // only currently-featured listings
       .order("featured_until", { ascending: false })
-      .limit(12);
+      .limit(1000);                       // effectively unlimited — show all featured
 
     if (error) {
       console.error("\n[featured error]", error, "\n");
