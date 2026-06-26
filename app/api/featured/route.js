@@ -12,7 +12,7 @@ export async function GET() {
     const nowIso = new Date().toISOString();
     const { data, error } = await supabase
       .from("listings")
-      .select("id, business_name, website_url, description, categories, mode, headquarters, image_url, avatar_url, header_url, clicks, featured_until, helpers(name)")
+     .select("id, business_name, website_url, description, categories, mode, headquarters, image_url, avatar_url, header_url, clicks, featured_until, helpers!left(name)")
       .eq("is_approved", true)
       .gt("featured_until", nowIso)        // only currently-featured listings
       .order("featured_until", { ascending: false })
