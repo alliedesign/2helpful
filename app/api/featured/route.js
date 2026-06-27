@@ -57,3 +57,17 @@ export async function GET() {
       categories: l.categories,
       mode: l.mode,
       headquarters: l.headquarters,
+      image_url: l.image_url,
+      avatar_url: l.avatar_url,
+      header_url: l.header_url,
+      helper_name: helperNameById[l.helper_id] || "",
+      rating: ratingById[l.id]?.avg_rating ?? null,
+      review_count: ratingById[l.id]?.review_total ?? 0,
+    }));
+
+    return Response.json({ featured });
+  } catch (e) {
+    console.error("\n[featured error] Unexpected:", e, "\n");
+    return Response.json({ error: e.message || String(e) }, { status: 500 });
+  }
+}
