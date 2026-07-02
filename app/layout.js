@@ -10,6 +10,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 5,
 };
+import SubscribePopup from "@/app/components/SubscribePopup";
 
 const css = `
 :root{--teal:#0eb6a4;--teal-deep:#0a8e80;--teal-ink:#063e38;--teal-wash:#e7f7f4;
@@ -76,6 +77,7 @@ export default function RootLayout({ children }) {
         <style dangerouslySetInnerHTML={{ __html: css }} />
       </head>
       <body>
+        <SubscribePopup isSignedIn={false} />
         <div className="topbar">
           <div className="wrap topbar-inner">
             <a className="logo" href="/">Helpful<span className="x">x</span>Humans<span style={{color:"var(--teal)"}}>.</span></a>
