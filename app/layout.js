@@ -38,4 +38,14 @@ export default function RootLayout({ children }) {
               <a href="https://www.tiktok.com/@helpful.humans" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
                 <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.89-4.63V9.4a6.33 6.33 0 00-1-.08A6.34 6.34 0 005.4 20.5a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.44-.5z"/></svg>
               </a>
-              <a href="https://www.youtube.com/@HelpfulxH
+              <a href="https://www.youtube.com/@HelpfulxHumans" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                <svg viewBox="0 0 24 24"><path d="M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 002.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>
+              </a>
+            </div>
+          </div>
+          <div className="footer-copy">© {new Date().getFullYear()} Helpful x Humans. Independent helpers, real people.</div>
+        </footer>
+      </body>
+    </html>
+  );
+}
