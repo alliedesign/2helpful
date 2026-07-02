@@ -92,6 +92,10 @@ export default function RootLayout({ children }) {
           </div>
         </div>
         {children}
+<form name="subscribers" data-netlify="true" netlify-honeypot="bot-field" hidden>
+  <input type="email" name="email" />
+  <input type="text" name="bot-field" />
+</form>
       </body>
     </html>
   );
