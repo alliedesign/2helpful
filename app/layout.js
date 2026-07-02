@@ -93,7 +93,7 @@ export default function RootLayout({ children }) {
             </nav>
           </div>
         </div>
-       
+       {children}
       </body>
     </html>
   );
