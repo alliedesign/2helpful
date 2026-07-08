@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { browserClient } from "@/lib/supabase";
 import { listingPhoto, listingScreenshot, listingAvatar, initials, colorFor } from "@/lib/listingImage";
+import MarketingOptIn from "@/app/components/MarketingOptIn";
 
 const supabase = browserClient();
 
@@ -31,6 +32,8 @@ export default function ListingProfile({ params }) {
   const [myRating, setMyRating] = useState(0);
   const [myBody, setMyBody] = useState("");
   const [savingReview, setSavingReview] = useState(false);
+  // Marketing opt-in — both boxes start UNCHECKED.
+  const [optIn, setOptIn] = useState({ emailOptIn: false, smsOptIn: false, phone: "" });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -63,7 +66,11 @@ export default function ListingProfile({ params }) {
     const name = session.user.user_metadata?.name || session.user.email?.split("@")[0] || "Someone";
     const res = await fetch("/api/reviews", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listingId: params.id, userId: session.user.id, authorName: name, rating: myRating, body: myBody }),
+      body: JSON.stringify({
+        listingId: params.id, userId: session.user.id, authorName: name, rating: myRating, body: myBody,
+        email: session.user.email, phone: optIn.phone,
+        emailOptIn: optIn.emailOptIn, smsOptIn: optIn.smsOptIn,
+      }),
     });
     const j = await res.json();
     setSavingReview(false);
@@ -189,6 +196,7 @@ export default function ListingProfile({ params }) {
             <Stars value={myRating} size={26} onPick={setMyRating} />
             <textarea value={myBody} onChange={(e) => setMyBody(e.target.value)} placeholder="Share your experience (optional)"
               style={{ width: "100%", border: "1px solid var(--silver)", borderRadius: 9, padding: ".6rem .8rem", minHeight: 70, marginTop: ".6rem", fontSize: ".92rem" }} />
+            <MarketingOptIn value={optIn} onChange={setOptIn} />
             {err && <div style={{ color: "#b13b3b", fontSize: ".85rem", marginTop: ".4rem" }}>{err}</div>}
             <div style={{ display: "flex", gap: ".6rem", marginTop: ".7rem", alignItems: "center" }}>
               <button onClick={submitReview} disabled={savingReview} className="btn" style={{ padding: ".5rem 1.1rem" }}>

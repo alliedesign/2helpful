@@ -2,6 +2,7 @@
 "use client";
 import { useState } from "react";
 import { browserClient } from "@/lib/supabase";
+import MarketingOptIn, { EMAIL_CONSENT_TEXT, SMS_CONSENT_TEXT } from "@/app/components/MarketingOptIn";
 
 const supabase = browserClient();
 
@@ -15,6 +16,32 @@ export default function AuthForm({ title = "Sign in", blurb = "" }) {
   const [err, setErr] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
+  // Marketing opt-in — both boxes start UNCHECKED; user actively consents.
+  const [optIn, setOptIn] = useState({ emailOptIn: false, smsOptIn: false, phone: "" });
+
+  // Fire-and-forget: record the marketing consent the user gave at signup.
+  async function recordSignupConsent(userId) {
+    if (!optIn.emailOptIn && !optIn.smsOptIn) return;
+    try {
+      await fetch("/api/marketing-consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          phone: optIn.phone,
+          name: name || email.split("@")[0],
+          userId: userId || null,
+          emailOptIn: optIn.emailOptIn,
+          smsOptIn: optIn.smsOptIn,
+          source: "signup",
+          consentText: [
+            optIn.emailOptIn ? EMAIL_CONSENT_TEXT : null,
+            optIn.smsOptIn ? SMS_CONSENT_TEXT : null,
+          ].filter(Boolean).join(" | "),
+        }),
+      });
+    } catch { /* don't block signup on marketing logging */ }
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -26,9 +53,12 @@ export default function AuthForm({ title = "Sign in", blurb = "" }) {
           options: { data: { name: name || email.split("@")[0] } },
         });
         if (error) { setErr(error.message); }
-        else if (!data.session) {
-          setInfo("Account created! If email confirmation is on, check your inbox to confirm, then sign in.");
-          setMode("signin");
+        else {
+          await recordSignupConsent(data.user?.id);
+          if (!data.session) {
+            setInfo("Account created! If email confirmation is on, check your inbox to confirm, then sign in.");
+            setMode("signin");
+          }
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -63,6 +93,11 @@ export default function AuthForm({ title = "Sign in", blurb = "" }) {
         )}
         <input style={field} type="email" required placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input style={field} type="password" required minLength={6} placeholder="Password (6+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} />
+        {mode === "signup" && (
+          <div style={{ marginTop: ".8rem" }}>
+            <MarketingOptIn value={optIn} onChange={setOptIn} />
+          </div>
+        )}
         {err && <div style={{ color: "#b13b3b", fontSize: ".88rem", marginTop: ".7rem" }}>{err}</div>}
         {info && <div style={{ color: "var(--teal-deep)", fontSize: ".88rem", marginTop: ".7rem" }}>{info}</div>}
         <button className="btn" disabled={busy} style={{ marginTop: "1rem", width: "100%" }}>
